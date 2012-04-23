@@ -14,7 +14,7 @@
 p = -> #require('util').debug
 i = -> #require('util').inspect
 
-exports ?= {}
+exports = {} if !exports
 
 exports.name = 'text-composable'
 
