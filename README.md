@@ -1,7 +1,57 @@
-ShareJS with text-formatted document type
+ShareJS with text-formatted document type (fork)
 =======
 
-Original project is Joseph Gentle's [`ShareJS`](https://github.com/josephg/ShareJS).
+A fast rich text editor which syncs between browsers in real-time.
+
+This repo is basically ShareJS with an text-formatted type added to it. All credits go to the original authors of this fork: ['rizzoma'](https://github.com/rizzoma/ShareJS). I'm only trying to improve it and will, when I succeed, create a few pull request back to the original fork.
+
+How to run
+---------------
+You need [node.js](http://nodejs.org/#download) and [npm](http://npmjs.org/) to be installed *(in newer versions npm is included in node.js)*. 
+
+You also need to install [redis](http://redis.io/download) for the database.
+
+Make sure a redis-server instance is running, just type `redis-server` into your terminal. Than open a new terminal to do the to following.
+
+Use the these commands to get the server running:
+
+    # run this in the dir you cloned this repo in:
+    
+    npm install .       
+    
+    bin/exampleserver
+    
+Then go to [http://localhost:8000/hello-rizzoma.html](http://localhost:8000/hello-rizzoma.html).
+
+Developing
+---------------
+
+When changing the code you can use `cake webclient` to generate the webclient javascript files for testing.
+
+
+Features
+------------
+* Rich text editing (bold, italic, strike-out)
+* Undo/redo support
+* Adding lists
+* Adding links
+* Adding images 
+
+Todo
+---------------
+
+* Editor has problems with characters with accents (é etc.)
+* Editor doesn't like "!" etc.
+* Browser compatibility problems
+* and a lot more...
+
+Browsers compatible
+---------------
+
+The original repo was only compatible with webkit browsers (including mobile). I'm trying to also build Firefox *(works now, but buggy)* and maybe even Internet Explorer support.
+
+Technology (from original fork)
+---------------
 
 This branch adds data type for formatted text. Operations on rich text.
 
@@ -76,7 +126,7 @@ After transformations & application of operations they will both have:
         }
     ]
     
-Simple idea to transfrom text insertion against params change does not work in all
+Simple idea to transform text insertion against params change does not work in all
 possible cases.  
 Params change when transformed against text insertion gets split into two operations
 if needed.  
