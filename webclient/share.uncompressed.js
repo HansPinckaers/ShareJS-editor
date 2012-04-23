@@ -2,6 +2,7 @@
   var BCSocket, Connection, Doc, FormattedText, MicroEvent, append, bootstrapTransform, check, checkValidComponent, checkValidOp, clone, exports, formattedText, invertComponent, nextTick, strInject, text, transformComponent, transformPosition, types,
     __slice = Array.prototype.slice,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+    __hasProp = Object.prototype.hasOwnProperty,
     __indexOf = Array.prototype.indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   window.sharejs = exports = {
@@ -697,6 +698,22 @@
       }
     };
 
+    FormattedText.prototype._hasOneParam = function(params) {
+      /*
+              Возвращает true, если у объекта ровно одно свое свойство
+              @param params: object
+              @return: boolean
+      */
+      var hasParam, prop;
+      hasParam = false;
+      for (prop in params) {
+        if (!__hasProp.call(params, prop)) continue;
+        if (hasParam) return false;
+        hasParam = true;
+      }
+      return hasParam;
+    };
+
     FormattedText.prototype._deleteParams = function(params, toDelete) {
       var name, value, _ref;
       _ref = this._getFirstParam(toDelete), name = _ref[0], value = _ref[1];
@@ -709,7 +726,7 @@
     FormattedText.prototype._applyParamsDelete = function(snapshot, op) {
       var transformBlock,
         _this = this;
-      if (Object.keys(op.paramsd).length !== 1) {
+      if (!this._hasOneParam(op.paramsd)) {
         throw new Error("Exactly one param should be deleted: " + (JSON.stringify(op)));
       }
       transformBlock = function(block) {
@@ -730,7 +747,7 @@
     FormattedText.prototype._applyParamsInsert = function(snapshot, op) {
       var transformBlock,
         _this = this;
-      if (Object.keys(op.paramsi).length !== 1) {
+      if (!this._hasOneParam(op.paramsi)) {
         throw new Error("Exactly one param should be inserted: " + (JSON.stringify(op)));
       }
       transformBlock = function(block) {
@@ -1509,7 +1526,7 @@
   exports.Doc = Doc;
 
   if (typeof WEB !== "undefined" && WEB !== null) {
-    types || (types = exports.types);
+    if (!types) types = exports.types;
     if (!window.BCSocket) {
       throw new Error('Must load browserchannel before this library');
     }

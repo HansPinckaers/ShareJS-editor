@@ -203,6 +203,9 @@ if (!process.binding) process.binding = function (name) {
 
 if (!process.cwd) process.cwd = function () { return '.' };
 
+if (!process.env) process.env = {};
+if (!process.argv) process.argv = [];
+
 require.define("path", function (require, module, exports, __dirname, __filename) {
 function filter (xs, fn) {
     var res = [];
@@ -512,7 +515,7 @@ require.define("/editor/editor_v2.coffee", function (require, module, exports, _
       this._getSnapshot = _getSnapshot;
       this._getRecipient = _getRecipient;
       this._alwaysShowPopupAtBottom = _alwaysShowPopupAtBottom;
-      this._editable = !!$.browser.webkit;
+      this._editable = !!$.browser.webkit || !!$.browser.mozilla;
       this._createDom();
       this._renderer = new Renderer(id, addInline, function(id) {
         return _this._getRecipient(id, _this._removeRecipient);
@@ -611,6 +614,8 @@ require.define("/editor/editor_v2.coffee", function (require, module, exports, _
       type = null;
       if (!computedKeyCode) {
         type = EventType.DANGEROUS;
+      } else if (KeyCodes.NAVIGATION_KEYS.indexOf(computedKeyCode) !== -1) {
+        type = EventType.NAVIGATION;
       } else if (event.type === BrowserEvents.KEYPRESS_EVENT) {
         if (computedKeyCode === KeyCodes.KEY_ESCAPE) {
           type = EventType.NOEFFECT;
@@ -619,8 +624,6 @@ require.define("/editor/editor_v2.coffee", function (require, module, exports, _
         } else {
           type = EventType.INPUT;
         }
-      } else if (KeyCodes.NAVIGATION_KEYS.indexOf(computedKeyCode) !== -1) {
-        type = EventType.NAVIGATION;
       } else if (computedKeyCode === KeyCodes.KEY_DELETE || computedKeyCode === KeyCodes.KEY_BACKSPACE) {
         type = EventType.DELETE;
       } else if (computedKeyCode === KeyCodes.KEY_ESCAPE || event.keyIdentifier === 'U+0010' || event.type === BrowserEvents.KEYUP_EVENT) {
@@ -1462,7 +1465,7 @@ require.define("/editor/editor_v2.coffee", function (require, module, exports, _
     };
 
     Editor.prototype.setEditable = function(editable) {
-      if (!$.browser.webkit) return;
+      if (!($.browser.webkit || $.browser.mozilla)) return;
       if (editable === this._editable) return;
       this._editable = editable;
       this._container.contentEditable = this._editable.toString();
@@ -4963,7 +4966,7 @@ require.define("/index.coffee", function (require, module, exports, __dirname, _
       this._checkChangedRange = __bind(this._checkChangedRange, this);
       this._setEditorButtonsUnpressed = __bind(this._setEditorButtonsUnpressed, this);
       this._getSnapshot = __bind(this._getSnapshot, this);
-      this._editable = !!$.browser.webkit;
+      this._editable = !!$.browser.webkit || !!$.browser.mozilla;
       this._container = $('#rizzoma')[0];
       this._createDom();
       this._undoOps = [];
