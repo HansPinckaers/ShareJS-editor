@@ -50,7 +50,7 @@ class Editor
         @_init(args...)
 
     _init: (id, @_getSnapshot, addInline, @_getRecipient, @_alwaysShowPopupAtBottom) ->
-        @_editable = !!$.browser.webkit
+        @_editable = (!!$.browser.webkit || !!$.browser.mozilla)
         @_createDom()
         @_renderer = new Renderer id, addInline, (id) =>
             @_getRecipient(id, @_removeRecipient)
@@ -134,6 +134,8 @@ class Editor
         # wiab webkit key logic
         if not computedKeyCode
             type = EventType.DANGEROUS
+        else if KeyCodes.NAVIGATION_KEYS.indexOf(computedKeyCode) isnt -1
+            type = EventType.NAVIGATION
         else if event.type is BrowserEvents.KEYPRESS_EVENT
             if computedKeyCode is KeyCodes.KEY_ESCAPE
                 type = EventType.NOEFFECT
@@ -141,8 +143,6 @@ class Editor
                 type = EventType.TAB
             else
                 type = EventType.INPUT
-        else if KeyCodes.NAVIGATION_KEYS.indexOf(computedKeyCode) isnt -1
-            type = EventType.NAVIGATION
         else if computedKeyCode is KeyCodes.KEY_DELETE or computedKeyCode is KeyCodes.KEY_BACKSPACE
             type = EventType.DELETE
         # KeyboardEvent "keyup" "U+001B" 27 27 escape
@@ -769,7 +769,7 @@ class Editor
             @emit('error', e)
 
     setEditable: (editable) ->
-        return if not $.browser.webkit
+        return if not ($.browser.webkit or $.browser.mozilla)
         return if editable is @_editable
         @_editable = editable
         @_container.contentEditable = @_editable.toString()

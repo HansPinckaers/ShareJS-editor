@@ -19,7 +19,7 @@ UNDO_GROUP_TIMEOUT = 3000
 
 class Rizzoma
     constructor: (@_doc) ->
-        @_editable = !!$.browser.webkit
+        @_editable = (!!$.browser.webkit || !!$.browser.mozilla)
         @_container = $('#rizzoma')[0]
         @_createDom()
         @_undoOps = []
