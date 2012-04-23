@@ -94,6 +94,8 @@ task 'webclient', 'Build the web client into one file', ->
         e "cp webclient/ace.js webclient/share-ace.js"
 
     e "node_modules/.bin/browserify src/client/rizzoma/index.coffee -o webclient/rizzoma.js"
+    e "coffee -o webclient -j hallo.js -c `find src/client/hallo -type f -name '*.coffee'`"
+    # e "uglifyjs examples/hallo.js > examples/hallo-min.js"
 
 #task 'lightwave', ->
 #	buildclosure ['client/web-prelude', 'client/microevent', 'types/text-tp2'], 'lightwave'
