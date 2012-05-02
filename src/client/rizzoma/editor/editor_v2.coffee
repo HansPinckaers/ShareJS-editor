@@ -13,6 +13,7 @@ MicroEvent = require('../utils/microevent')
 Utf16Util = require('../utils/string').Utf16Util
 LinkPopup = require('./link_editor/link_popup').LinkPopup
 LinkEditor = require('./link_editor').LinkEditor
+
 #TODO: clean unused code
 class EventType
     # Ввод содержимого
@@ -44,6 +45,12 @@ INITIAL_LINE[ModelField.PARAMS] = {}
 INITIAL_LINE[ModelField.PARAMS][ParamsField.TYPE] = ModelType.LINE
 INITIAL_CONTENT = [INITIAL_LINE]
 LINK_POPUP_TIMEOUT = 50
+
+#
+# The editor is used to edit and track changes to create/submit ops.
+# It emits ops and via the microevent.js it will get to index.coffee
+# In index.coffee the Rizzoma class submits the ops to the share.js doc.
+#
 
 class Editor
     constructor: (args...) ->
@@ -427,25 +434,25 @@ class Editor
 
     _processSelection: (startOffset, endOffset, lastElement, action, param, value) ->
         ###
-        Для указанного выделения возвращает результаты, полученные одним из действий:
-        SelectionAction.DELETE: удаление, возвращает ShareJS-операции удаления
-        SelectionAction.TEXT: изменение параметров текста, возввращает ShareJS-операции
-            маркировки текста
-        SelectionAction.LINE: изменение парметров абзацев, возвращает ShareJS-операции
-            маркировки абзацев
-        SelectionAction.GETTEXTPARAMS: текстовые параметры, возвращает массив объектов параметров
-            для всех текстовых блоков внутри выделения
-        SelectionAction.GETLINEPARAMS: абзацевые параметры. возвращает массив объектов параметров
-            для всех абзацев, содержащих выделение
-        SelectionAction.CLEARTEXTPARAMS: удаление параметров текста, возвращает ShareJS-операции
-            удаления маркировки текста (кроме ссылок)
-        @param startOffset: int - начальное смещение
-        @param endOffset: int - конечное смещение (не включая элемент по смещению)
-        @param lastElement: HTMLElement - элемент, на который попадает конец выделения (включен в выделение)
-        @param action: SelectionAction - действие, которое будет совершаться над выделением
-        @param param: имя параметра для маркировки (только для действий по маркировке выделения)
-        @param value: значение параметра для маркировки (только для действий по маркировке веделения)
-        @returns: [object]
+        The specified selection returns the results obtained by one of the following:
+        SelectionAction.DELETE: delete returns ShareJS-deletion
+        SelectionAction.TEXT: modify text vozvvraschaet ShareJS-operation
+            Marking the text
+        SelectionAction.LINE: parameter has modified the paragraph returns ShareJS-operation
+            marking paragraphs
+        SelectionAction.GETTEXTPARAMS: text parameters, returns an array of options
+            for all text boxes within the selection
+        SelectionAction.GETLINEPARAMS: abzatsevye parameters. returns an array of options
+            for all paragraphs containing the selection
+        SelectionAction.CLEARTEXTPARAMS: delete the text parameter, returns ShareJS-operation
+            removal of marking text (excluding references)
+        @ Param startOffset: int - the starting offset
+        @ Param endOffset: int - the end offset (not including the element of bias)
+        @ Param lastElement: HTMLElement - the element that gets the end of selection (included in release)
+        @ Param action: SelectionAction - an action that will take place over the allocation of
+        @ Param param: the parameter name for the label (for action by the marking allocation)
+        @ Param value: value for labeling (for action on labeling vedeleniya)
+        @ Returns: [object]
         ###
         res = []
         selectionLength = endOffset - startOffset

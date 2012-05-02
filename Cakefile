@@ -69,9 +69,9 @@ expandNames = (names) -> ("src/#{c}.coffee" for c in names).join ' '
 compile = (filenames, dest) ->
 	filenames = expandNames filenames
 	# I would really rather do this in pure JS.
-	e "coffee -j #{dest}.uncompressed.js -c #{filenames}", ->
-		console.log "Uglifying #{dest}"
-		makeUgly "#{dest}.uncompressed.js", "#{dest}.js"
+	#e "coffee -j #{dest}.uncompressed.js -c #{filenames}", ->
+		#console.log "Uglifying #{dest}"
+		#makeUgly "#{dest}.uncompressed.js", "#{dest}.js"
 
 buildtype = (name) ->
 	filenames = ['types/web-prelude', "types/#{name}"]
@@ -88,13 +88,18 @@ task 'webclient', 'Build the web client into one file', ->
     buildtype 'text-tp2'
 
     # TODO: This should also be closure compiled.
-    extrafiles = expandNames extras
-    e "coffee --compile --output webclient/ #{extrafiles}", ->
-        # For backwards compatibility. (The ace.js file used to be called share-ace.js)
-        e "cp webclient/ace.js webclient/share-ace.js"
+    # extrafiles = expandNames extras
+    # e "coffee --compile --output webclient/ #{extrafiles}", ->
+    #    # For backwards compatibility. (The ace.js file used to be called share-ace.js)
+    #    e "cp webclient/ace.js webclient/share-ace.js"
 
     e "node_modules/.bin/browserify src/client/rizzoma/index.coffee -o webclient/rizzoma.js"
-    e "coffee -o webclient -j hallo.js -c `find src/client/hallo -type f -name '*.coffee'`"
+    e "node_modules/.bin/browserify src/client/hallo/renderer/renderer.coffee -o webclient/hallo-renderer.js"
+    e "node_modules/.bin/browserify src/client/hallo/hallo/hallo.coffee -o webclient/hallo.js"
+    
+    e "coffee -o webclient -j hallo-plugins.js -c `find src/client/hallo/hallo/plugins -type f -name '*.coffee'`"
+    e "coffee -o webclient -j hallo-widgets.js -c `find src/client/hallo/hallo/widgets -type f -name '*.coffee'`"
+    
     # e "uglifyjs examples/hallo.js > examples/hallo-min.js"
 
 #task 'lightwave', ->

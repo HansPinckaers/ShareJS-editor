@@ -1,3 +1,6 @@
+Utf16Util = require('./utils/string').Utf16Util
+DomUtils = require('./utils/dom')
+
 ###
 Hallo - a rich text editing jQuery UI widget
 (c) 2011 Henri Bergius, IKS Consortium
@@ -104,6 +107,8 @@ Hallo may be freely distributed under the MIT license
         originalContent: ""
         uuid: ""
         selection: null
+        doc: null
+        _renderer: null
 
         options:
             editable: true
@@ -151,6 +156,7 @@ Hallo may be freely distributed under the MIT license
             @element.unbind "blur", @_deactivated
             @element.unbind "keyup paste change", @_checkModified
             @element.unbind "keyup", @_keys
+            @element.unbind "keypress", @_processTyping            
             @element.unbind "keyup mouseup", @_checkSelection
             @bound = false
             @_trigger "disabled", null
@@ -167,6 +173,7 @@ Hallo may be freely distributed under the MIT license
                 @element.bind "blur", this, @_deactivated
                 @element.bind "keyup paste change", this, @_checkModified
                 @element.bind "keyup", this, @_keys
+                @element.bind "keypress", this, @_processTyping
                 @element.bind "keyup mouseup", this, @_checkSelection
                 widget = this
                 @bound = true
@@ -377,6 +384,59 @@ Hallo may be freely distributed under the MIT license
                     thrown: old
 
                 widget.turnOff()
+                
+        # NEWWW: ------
+        
+        _processTyping: (event) ->
+            c = Utf16Util.traverseString(String.fromCharCode(event.charCode))
+            return yes if not c.length
+            
+            widget = event.data
+            doc = widget.options.doc
+            
+            range = widget.getSelection()
+            return yes if not range
+
+            [startElement, startOffset] = widget._getStartElementAndOffset(range, event)
+            op = {p: startOffset, ti: c, params: { __TYPE: "TEXT" }}
+            doc.submitOp([op])
+            
+        _getCurrentElement: (node, offset, event) ->
+            widget = event.data
+            renderer = widget.options._renderer
+                        
+            # Возвращает элемент, содержащий параметры и смещение этого элемента
+            return [renderer.getPreviousElement(node), offset] if DomUtils.isTextNode(node)
+            rightNode = node.childNodes[offset]
+            if rightNode
+                element = renderer.getPreviousElement(rightNode)
+                return [element, 0] if DomUtils.isTextNode(rightNode)
+                return [element, renderer.getElementLength(element)]
+            leftNode = node.childNodes[offset - 1] || node
+            if leftNode
+                element = if (renderer.getElementType(leftNode))? then leftNode else renderer.getPreviousElement(leftNode)
+                return [element, renderer.getElementLength(element)]
+            console.error node, offset
+            throw 'could not determine real node'
+        
+        _getOffsetBefore: (node, event) ->
+            widget = event.data
+            renderer = widget.options._renderer
+
+            # Возращает смедение в снепшоте до текущей ноды
+            offset = 0
+            while node = renderer.getPreviousElement(node)
+                offset += renderer.getElementLength(node)
+            offset
+        
+        _getStartElementAndOffset: (range, event) ->
+            widget = event.data
+
+            [curNode, offset] = widget._getCurrentElement(range.startContainer, range.startOffset, event)
+            prevOffset = widget._getOffsetBefore(curNode, event) + offset
+            [curNode, prevOffset]
+            
+        # ---------------
 
         _rangesEqual: (r1, r2) ->
             r1.startContainer is r2.startContainer and r1.startOffset is r2.startOffset and r1.endContainer is r2.endContainer and r1.endOffset is r2.endOffset

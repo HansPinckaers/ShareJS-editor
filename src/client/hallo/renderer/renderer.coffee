@@ -1,10 +1,10 @@
-BrowserEvents = require('../utils/browser_events')
+BrowserEvents = require('./utils/browser_events')
 ModelField = require('./model').ModelField
 ParamsField = require('./model').ParamsField
 ModelType = require('./model').ModelType
 TextLevelParams = require('./model').TextLevelParams
 LineLevelParams = require('./model').LineLevelParams
-DomUtils = require('../utils/dom')
+DomUtils = require('./utils/dom')
 Attachment = require('./attachment').Attachment
 
 BULLETED_LIST_LEVEL_PADDING = 15 # Дополнительные отступы для уровней bulleted list
@@ -20,9 +20,16 @@ class Renderer
     constructor: (args...) ->
         @_init(args...)
 
-    _init: (@_id, @_addInline, @_getRecipient) ->
+    _init: (@_id, @_container, @_doc) ->
         # recipient nodes cache
         @_recipients = []
+        # render first snapshot
+        @renderContent @_doc.snapshot
+        # register for remote op
+        self = this
+        @_doc.on 'remoteop', (ops) -> 
+            console.log ops
+            self.applyOps(ops, yes)
 
     _paramsEqual: (p1, p2) ->
         for i of p1
@@ -53,7 +60,7 @@ class Renderer
         return node if not node.lastChild
         return @_getDeepestLastNode(node.lastChild)
 
-    renderContent: (@_container, content) ->
+    renderContent: (content) ->
         ###
         Отрисовка содержимого редактора по снимку его содержимого
         @param _container: HTMLElement - элемент редактора, в который будет вставляться содержимое
@@ -191,7 +198,6 @@ class Renderer
                     return [nextElement.firstChild, 0]
 
     _getElementAndOffset: (index, node = @_container) ->
-        console.log node
         curNode = node = @getNextElement(node)
         offset = @getElementLength(curNode)
         while curNode
@@ -586,17 +592,13 @@ class Renderer
     getNextElement: (node = @_container) ->
         type = @getElementType(node)
         if not type or type is ModelType.LINE
-            console.log ("not" + type + "or ModelType.LINE")
             child = node.firstChild
             while child
-                console.log @getElementType(child)?
                 return child if @getElementType(child)?
                 firstNode = @getNextElement(child)
-                console.log firstNode
                 return firstNode if firstNode
                 child = child.nextSibling
         until node is @_container
-            console.log ("node is @_container")
             nextNode = node.nextSibling
             while nextNode
                 return nextNode if @getElementType(nextNode)?
@@ -703,3 +705,7 @@ class Renderer
             $(recipientNode).data('recipient')?.destroy()
 
 exports.Renderer = Renderer
+
+
+# sharejs.open 'hello', 'ftext', (error, doc) =>
+    # renderer = new Renderer doc.name, $("#editable")[0], doc
